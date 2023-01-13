@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -128,7 +129,7 @@ public class Fuzz {
      * @return ArrayList<String>    String arraylist representing all of the Twitch M3U8 VOD domains.
      */
     private static ArrayList<String> getDomains(){
-        ArrayList<String> domains=new ArrayList<String>();
+       /* ArrayList<String> domains=new ArrayList<String>();
         boolean added=false;
         try {
             URL dURL=new URL("https://raw.githubusercontent.com/TwitchRecover/TwitchRecover/main/domains.txt");
@@ -155,7 +156,8 @@ public class Fuzz {
                 domains.add("https://ds0h3roq6wcgc.cloudfront.net");
                 domains.add("https://dqrpb9wgowsf5.cloudfront.net");
             }
-        }
+        }*/
+        ArrayList<String> domains=new ArrayList<String>(Arrays.asList("https://ddacn6pr5v0tl.cloudfront.net", "https://d1ymi26ma8va5x.cloudfront.net", "https://d1m7jfoe9zdc1j.cloudfront.net", "https://vod-metro.twitch.tv", "https://d2nvs31859zcd8.cloudfront.net", "https://d1mhjrowxxagfy.cloudfront.net", "https://dgeft87wbj63p.cloudfront.net", "https://d2vjef5jvl6bfs.cloudfront.net", "https://d3vd9lfkzbru3h.cloudfront.net", "https://vod-pop-secure.twitch.tv", "https://dqrpb9wgowsf5.cloudfront.net", "https://d2e2de1etea730.cloudfront.net", "https://vod-secure.twitch.tv", "https://ds0h3roq6wcgc.cloudfront.net", "https://d3aqoihi2n8ty8.cloudfront.net", "https://d2aba1wr3818hz.cloudfront.net", "https://d3c27h4odz752x.cloudfront.net"));
         return domains;
     }
 
@@ -196,12 +198,13 @@ public class Fuzz {
         ArrayList<String> results=new ArrayList<String>();
         for(int i=0; i<60; i++){
             String url=Compute.URLCompute(name, streamID, timestamp+i);
-            if(checkURL(url)){
+            /*if(checkURL(url)){
                 ArrayList<String> vResults=verifyURL(url);
                 for(String u: vResults){
                     results.add(u);
                 }
-            }
+            }*/
+            results.addAll(verifyURL(url));
         }
         return results;
     }

@@ -19,11 +19,17 @@ package TwitchRecover.Core.Downloader;
 
 import TwitchRecover.Core.Enums.FileExtension;
 import lombok.Cleanup;
+import net.bramp.ffmpeg.*;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.NavigableMap;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * This class handles all of the file handling
@@ -51,14 +57,42 @@ class FileHandler {
      * @param fp            Final file path of the file.
      */
     protected static String mergeFile(NavigableMap<Integer, File> segmentMap, String fp){
-        File output=new File(fp);
-        segmentMap.forEach((key, segment) -> {
-            try{
-                fileMerger(segment, output);
-            }
-            catch(Exception ignored){}
-        });
-        return output.getAbsolutePath();
+        try {
+            File output = new File(fp);
+            // Creation of string containing all input file ordered
+            String filesStrings = new ArrayList<File>(segmentMap.values())
+                    .stream()
+                    .map(f -> f.getName())
+                    .map(p -> "file " + p + "\n" +
+                            "stream\n" +
+                            "exact_stream_id 0x102\n" +
+                            "stream\n" +
+                            "exact_stream_id 0x101\n" +
+                            "stream\n" +
+                            "exact_stream_id 0x100")
+                    .collect(joining(System.getProperty("line.separator")));
+
+            // Saving this in a temp file
+            Path listOfFiles = Files.createTempFile(FileHandler.TEMP_FOLDER_PATH, "ffmpeg-list-", ".txt");
+            Files.write(listOfFiles, filesStrings.getBytes());
+
+            // Using this txt file as input
+            FFmpegBuilder builder = new FFmpegBuilder()
+                    .addExtraArgs("-max_streams","10000","-stats")
+                    .setInput(listOfFiles.toAbsolutePath().toString())
+                    .setFormat("concat")
+                    .setVerbosity(FFmpegBuilder.Verbosity.WARNING)
+                    .addOutput(output.getAbsolutePath())
+                    .setAudioCodec("copy")
+                    .setVideoCodec("copy")
+                    .done();
+            FFmpegExecutor executor = new FFmpegExecutor();
+            executor.createJob(builder).run();
+            return output.getAbsolutePath();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+        return null;
     }
 
     /**

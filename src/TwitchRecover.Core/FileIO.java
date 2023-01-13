@@ -78,8 +78,8 @@ public class FileIO {
      * @return String   String value representing the adjusted file path.
      */
     public static String adjustFP(String fp){
-        if(fp.indexOf('\\')!=fp.length()-1){
-            fp+="\\";
+        if(fp.indexOf(File.separator)!=fp.length()-1){
+            fp+=File.separator;
         }
         return fp;
     }

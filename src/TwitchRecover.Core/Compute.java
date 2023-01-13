@@ -62,6 +62,7 @@ public class Compute {
      * @return long     Long value which represents the UNIX timestamp.
      */
     protected static long getUNIX(String ts){
+        // ts = "2022-12-27 21:51:32";
         String time = ts + " UTC";
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
         Date date=null;

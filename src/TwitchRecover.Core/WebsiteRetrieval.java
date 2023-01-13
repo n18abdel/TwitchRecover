@@ -79,7 +79,7 @@ public class WebsiteRetrieval {
         if(url.contains("twitchtracker.com/") && url.contains("/streams/")) {
             return 1;   //Twitch Tracker URL.
         }
-        else if(url.contains("streamscharts.com/twitch/channels/") && url.contains("/streams/")) {
+        else if(url.contains("streamscharts.com/channels/") && url.contains("/streams/")) {
             return 2;   //Streams Charts URL.
         }
         return -1;
@@ -126,26 +126,29 @@ public class WebsiteRetrieval {
         URL obj = new URL(url);
         HttpURLConnection httpcon = (HttpURLConnection) obj.openConnection();
         httpcon.setRequestMethod("GET");
-        httpcon.setRequestProperty("User-Agent", "Mozilla/5.0");
+        httpcon.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:92.0) Gecko/20100101 Firefox/92.0");
+        httpcon.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+        httpcon.setRequestProperty("cookie", "cf_clearance=cY4HfAeE.M3mCWyP6d7EhNk8_ULcZziGrb7sx3UbK1M-1645569580-0-150; __cf_bm=NkiUBcS7kZzZHpJQKkGRGc_saNp5L_CSHFfXrmjQPF4-1645569586-0-AZJbb0te3sp2sJufq71iVSloCke4E2JuwQf8u0LvTAfyx9k2WUB9harhuIqPoubdt3U2BDbewLLQ+5nv1Jeacx+Fxlsn2KYkRoX6bK41FSgLb9920GwV2veL9t8h0F4HJQ==");
         if(httpcon.getResponseCode() == HttpURLConnection.HTTP_OK) {
             //Get the timestamp:
             BufferedReader brt = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
             String response;
             String responseD = "";
-            for(int i = 0; i < 300; i++) {
+            for(int i = 0; i < 400; i++) {
                 response = brt.readLine();
                 if(i == 7) {
                     int tsIndex = response.indexOf(" on ") + 4;
                     results[2] = response.substring(tsIndex, tsIndex + 19);
                 }
                 //Stream duration fetcher:
-                if(response.contains("stats-value to-time-lg")) {
+                if(response.contains("stats-value stats-value-sm to-time-lg")) {
                     responseD = response;
+                    break;
                 }
             }
 
             //Get the stream duration:
-            String durationPattern = "<div class=\"stats-value to-time-lg\">(\\d*)</div>";
+            String durationPattern = "<div class=\"stats-value stats-value-sm to-time-lg\">(\\d*)</div>";
             Pattern dr = Pattern.compile(durationPattern);
             Matcher dm = dr.matcher(responseD);
             if(dm.find()) {
@@ -179,7 +182,7 @@ public class WebsiteRetrieval {
         String userID;
         double duration = 0.0;
         //Retrieve initial values:
-        String pattern = "streamscharts\\.com\\/twitch\\/channels\\/([a-zA-Z0-9_-]*)\\/streams\\/(\\d*)";
+        String pattern = "streamscharts\\.com\\/channels\\/([a-zA-Z0-9_-]*)\\/streams\\/(\\d*)";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(url);
         if(m.find()) {
